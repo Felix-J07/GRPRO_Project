@@ -4,9 +4,8 @@ import itumulator.world.Location;
 import itumulator.executable.Program;
 import itumulator.world.Location;
 import java.util.*;
+
 public class Helpers {
-
-
     public static Set<Location> getAllTiles(int worldSize) {
         Set<Location> tile = new HashSet<>();
         for(int x = 0; x < worldSize; x++) {
@@ -16,7 +15,6 @@ public class Helpers {
         }
         return tile;
     }
-
 
     public static Location getRandomEmptyTile(World w) {
         int worldSize = w.getSize();
@@ -32,8 +30,16 @@ public class Helpers {
         while(!w.isTileEmpty(location));
         return location;
     }
+
+    public static Location getRandomEmptySurroundingTile(World w, Location l) {
+        Random r = new Random();
+        Set<Location> neighbours = w.getEmptySurroundingTiles(l);
+        List<Location> list = new ArrayList<>(neighbours);
+        if (list.size() == 0) return null;
+        return list.get(r.nextInt(list.size()));
+    }
     
-    public Queue<Location> getRoute(World world, Location from, Location to, int steps) {
+    public static Queue<Location> getRoute(World world, Location from, Location to, int steps) {
         Queue<Location> route = new LinkedList<>();
         if (from.equals(to)) return route;
         Location next = new Location(from.getX(), from.getY());
@@ -59,5 +65,20 @@ public class Helpers {
         }
 
         return route;
+    }
+
+    public static Location getRandomNearbyOfType(World world, Location location, Class<?> type, boolean non_blocking) {
+        Set<Location> neighbours = world.getSurroundingTiles(location);
+        for (Location current : neighbours) {
+            if (non_blocking) {
+                if (!type.isInstance(world.getNonBlocking(current))) neighbours.remove(current);
+            } else {
+                if (!type.isInstance(world.getTile(current))) neighbours.remove(current);
+            }
+        }
+        List<Location> list = new ArrayList<>(neighbours);
+        if (list.size() == 0) return null;
+        Random random = new Random();
+        return list.get(random.nextInt(list.size()));
     }
 }
