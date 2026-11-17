@@ -6,11 +6,12 @@ import itumulator.world.Location;
 import itumulator.world.World;
 
 public class Main {
-
+    int worldSize;  
     public static void main(String[] args) {
-        int size = 5;
+        int size = 5; 
+         // Size var originalt her, men jeg flyttede den op så den kan læses.
         Program p = new Program(size, 800, 75);
-
+        
         World w = p.getWorld();
 
         // w.setTile(new Location(0, 0), new <MyClass>());
@@ -19,4 +20,5 @@ public class Main {
 
         p.show();
     }
+
 }
