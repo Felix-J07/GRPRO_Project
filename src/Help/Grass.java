@@ -26,7 +26,7 @@ public class Grass implements NonBlocking, Actor {
         Set<Location> neighbors = world.getSurroundingTiles(current);
         ArrayList<Location> neighborsArray = new ArrayList<Location>(neighbors);
         Random r = new Random();
-        
+         
         int randomNeighbor;
         do{
             randomNeighbor = r.nextInt(neighborsArray.size());

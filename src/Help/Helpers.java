@@ -22,9 +22,14 @@ public class Helpers {
 
         Random r = new Random();
 
-        int randomTileX = r.nextInt(0,worldSize);
-        int randomTileY = r.nextInt(0,worldSize);
-        return new Location(randomTileX,randomTileY);
+        Location location;
+        do {
+            int randomTileX = r.nextInt(0,worldSize);
+            int randomTileY = r.nextInt(0,worldSize);
+            location = new Location(randomTileX, randomTileY);
+        }
+        while(!w.isTileEmpty(location));
+        return location;
     }
     
 }
