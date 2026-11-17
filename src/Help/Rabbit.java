@@ -2,12 +2,15 @@ package Help;
 
 import itumulator.world.World;
 
+import java.awt.Color;
 import java.util.*;
 
+import itumulator.executable.DisplayInformation;
+import itumulator.executable.DynamicDisplayInformationProvider;
 import itumulator.simulator.Actor;
 import itumulator.world.Location;
 
-public class Rabbit implements Actor {
+public class Rabbit implements Actor, DynamicDisplayInformationProvider {
     final int max_age = 5*itumulator.world.World.getTotalDayDuration();
     double energy;
     final int max_steps_without_food = itumulator.world.World.getTotalDayDuration();
@@ -19,6 +22,8 @@ public class Rabbit implements Actor {
     Queue<Location> queue;
     boolean movedDuringNight;
 
+    boolean isNight;
+
     public Rabbit() {
         energy = 1;
         random = new Random();
@@ -27,6 +32,8 @@ public class Rabbit implements Actor {
 
     @Override 
     public void act(World world) {
+        isNight = world.isNight();
+
         Location next_queue_item = queue.poll();
         if (next_queue_item != null) {
             world.move(this, next_queue_item);
@@ -128,5 +135,16 @@ public class Rabbit implements Actor {
     public int getMaxMovesPerStep() {
         if (energy > 0.1) return 3;
         return 2;
+    }
+
+    @Override 
+    public DisplayInformation getInformation() {
+        String image_key;
+        if (isNight) {
+            image_key = "rabbit-small-sleeping";
+        } else {
+            image_key = "rabbit-small";
+        }
+        return new DisplayInformation(Color.GRAY, image_key);
     }
 }
