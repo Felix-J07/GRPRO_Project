@@ -19,9 +19,9 @@ public class Main {
 
         //                       --- Midlertidig Random() Burrow logik ---
         // Tilføj Burrow ved en tilfældig plads
-        int amount = 1; // Midlertidig værdi for mængden af Burrows
         
-        for(int i = 0; i < amount; i++) {
+        for(int i = 0; i < 1; i++) {
+            //Implementation af Helpers-klassen
             Location l = Helpers.getRandomEmptyTile(w);
 
             w.setTile(l, new Burrow());
