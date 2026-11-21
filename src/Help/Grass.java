@@ -1,15 +1,11 @@
 package Help;
 import itumulator.world.World;
-import itumulator.executable.DisplayInformation;
 import itumulator.simulator.Actor;
 import itumulator.world.Location;
 import java.util.*;
 import itumulator.world.NonBlocking;
-import java.awt.*;
 
 public class Grass implements NonBlocking, Actor {
-    DisplayInformation di = new DisplayInformation(Color.green, "grass");
-
     public Grass() {
 
     }
@@ -21,19 +17,27 @@ public class Grass implements NonBlocking, Actor {
         }
     } 
 
-    public Location spread(World world) {
+    // public Location spread(World world) {
+    public void spread(World world) {
+        Location empty_tile = Helpers.getRandomEmptySurroundingNonBlockingLocation(world, world.getLocation(this));
+        if (empty_tile != null) {
+            world.setTile(empty_tile, new Grass());
+        }
+
+        /*
         Location current = world.getLocation(this);
-        Set<Location> neighbors = world.getSurroundingTiles(current);
-        ArrayList<Location> neighborsArray = new ArrayList<Location>(neighbors);
+        Set<Location> neighbours = world.getSurroundingTiles(current);
+        ArrayList<Location> neighboursArray = new ArrayList<Location>(neighbours);
         Random r = new Random();
          
-        int randomNeighbor;
+        int randomNeighbour;
         do{
-            randomNeighbor = r.nextInt(neighborsArray.size());
+            randomNeighbour = r.nextInt(neighboursArray.size());
         }
-        while(!world.isTileEmpty(neighborsArray.get(randomNeighbor)));
+        while(!world.isTileEmpty(neighboursArray.get(randomNeighbour)));
         
-        return neighborsArray.get(randomNeighbor);
-        }
+        return neighboursArray.get(randomNeighbour);
+        */
+    }
  }
 
