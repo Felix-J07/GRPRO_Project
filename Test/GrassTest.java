@@ -17,9 +17,9 @@ public class GrassTest {
 
     @BeforeEach 
     public void setUp() {
-        World w = new World(3);
-        Grass g = new Grass();
-        Location startLocation = new Location(1,1);
+        w = new World(3);
+        g = new Grass();
+        startLocation = new Location(1,1);
         w.setTile(startLocation, g);
 
     }
