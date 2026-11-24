@@ -18,11 +18,14 @@ public class Grass implements NonBlocking, Actor, Entity {
     } 
 
     // public Location spread(World world) {
-    public void spread(World world) {
+    public Grass spread(World world) {
         Location empty_tile = Helpers.getRandomEmptySurroundingNonBlockingLocation(world, world.getLocation(this));
         if (empty_tile != null) {
-            world.setTile(empty_tile, new Grass());
+            Grass grass_new = new Grass();
+            world.setTile(empty_tile, grass_new);
+            return grass_new;
         }
+        return null;
 
         /*
         Location current = world.getLocation(this);
