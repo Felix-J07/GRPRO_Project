@@ -10,10 +10,10 @@ import itumulator.executable.DynamicDisplayInformationProvider;
 import itumulator.simulator.Actor;
 import itumulator.world.Location;
 
-public class Rabbit implements Actor, DynamicDisplayInformationProvider {
+public class Rabbit implements Actor, DynamicDisplayInformationProvider, Entity {
     final int max_age = 5*itumulator.world.World.getTotalDayDuration();
     double energy;
-    final int max_steps_without_food = 5*itumulator.world.World.getTotalDayDuration();
+    final int max_steps_without_food = itumulator.world.World.getTotalDayDuration();
     int steps_without_food;
     final int getting_hungry = 5;
     final double chance_of_reproduction = 0.3;
@@ -58,7 +58,7 @@ public class Rabbit implements Actor, DynamicDisplayInformationProvider {
                 // sleeping = true;
                 if (burrow == null) {
                     Location current = world.getLocation(this);
-                    Location burrow_location = world.getNonBlocking(current) instanceof Burrow ? current : Helpers.getRandomNearbyOfType(world, world.getLocation(this), Burrow.class, true);
+                    Location burrow_location = world.getNonBlocking(current) instanceof Burrow ? current : Helpers.getRandomNearbyOfType(world, world.getLocation(this), Burrow.class, true, true);
 
                     // If no burrow is in vicinity
                     if (burrow_location == null) {
@@ -93,7 +93,17 @@ public class Rabbit implements Actor, DynamicDisplayInformationProvider {
             try {
                 world.getLocation(this);
             } catch (IllegalArgumentException e) {
-                world.setTile(world.getLocation(burrow), this);
+                try {
+                    world.setTile(world.getLocation(burrow), this);
+                } catch (IllegalArgumentException ex) {
+                    Location surrounding_location = Helpers.getRandomEmptySurroundingTile(world, world.getLocation(burrow));
+                    if (surrounding_location == null) {
+                        Location empty_tile = Helpers.getRandomEmptyTile(world, false);
+                        if (empty_tile == null) return;
+                        world.setTile(empty_tile, this);
+                    }
+                    else world.setTile(surrounding_location, this);
+                }
                 world.getLocation(this);
                 act(world);
                 return;
@@ -102,8 +112,13 @@ public class Rabbit implements Actor, DynamicDisplayInformationProvider {
             if (steps_without_food >= getting_hungry) {
                 // Eat grass
                 Location current = world.getLocation(this);
-                Location nearby_grass = Helpers.getRandomNearbyOfType(world, current, Grass.class, true);
-                if (nearby_grass != null) {
+                Location nearby_grass;
+                int i = 0;
+                do {
+                    nearby_grass = Helpers.getRandomNearbyOfType(world, current, Grass.class, true, true);
+                    i++;
+                } while (nearby_grass != null && world.isTileEmpty(nearby_grass) && i < 10);
+                if (nearby_grass != null && world.isTileEmpty(nearby_grass)) {
                     world.move(this, nearby_grass);
                     world.delete(world.getNonBlocking(nearby_grass));
                     steps_without_food = 0;
@@ -113,12 +128,11 @@ public class Rabbit implements Actor, DynamicDisplayInformationProvider {
                 }
             } else {
                 Location current = world.getLocation(this);
-                Location nearby_rabbit = Helpers.getRandomNearbyOfType(world, current, Rabbit.class, false);
+                Location nearby_rabbit = Helpers.getRandomNearbyOfType(world, current, Rabbit.class, false, false);
                 Location empty_tile = Helpers.getRandomEmptySurroundingTile(world, current);
 
                 if (nearby_rabbit != null && empty_tile != null && steps_without_food < getting_hungry && random.nextDouble(1) < chance_of_reproduction) {
                     // Reproduction
-                    System.out.println(nearby_rabbit);
                     world.setTile(empty_tile, new Rabbit(burrow));
                 } else {
                     // Random move
@@ -128,7 +142,7 @@ public class Rabbit implements Actor, DynamicDisplayInformationProvider {
         }
 
         energy -= 1.0/max_age;
-        if (energy == 0 || ++steps_without_food >= max_steps_without_food) {
+        if (energy <= 0 || ++steps_without_food >= max_steps_without_food) {
             world.delete(this);
         }        
     }
@@ -136,6 +150,11 @@ public class Rabbit implements Actor, DynamicDisplayInformationProvider {
     public int getMaxMovesPerStep() {
         if (energy > 0.1) return 3;
         return 2;
+    }
+
+    @Override
+    public boolean getNonBlockingStatus() {
+        return false;
     }
 
     @Override 

@@ -16,7 +16,7 @@ public class Helpers {
         return tile;
     }
 
-    public static Location getRandomEmptyTile(World w) {
+    public static Location getRandomEmptyTile(World w, boolean non_blocking) {
         int worldSize = w.getSize();
         int worldSizeSquared = worldSize*worldSize;
 
@@ -29,7 +29,7 @@ public class Helpers {
             int randomTileY = r.nextInt(0,worldSize);
             location = new Location(randomTileX, randomTileY);
         }
-        while(!w.isTileEmpty(location));
+        while((non_blocking && w.containsNonBlocking(location)) || (!non_blocking && !w.isTileEmpty(location)));
         return location;
     }
 
@@ -72,7 +72,7 @@ public class Helpers {
         return route;
     }
 
-    public static Location getRandomNearbyOfType(World world, Location location, Class<?> type, boolean non_blocking) {
+    public static Location getRandomNearbyOfType(World world, Location location, Class<?> type, boolean non_blocking, boolean empty) {
         Set<Location> neighbours = world.getSurroundingTiles(location);
         List<Location> list = new ArrayList<>(neighbours);
         for (Location current : list) {
@@ -85,7 +85,15 @@ public class Helpers {
         list = new ArrayList<>(neighbours);
         if (list.size() == 0) return null;
         Random random = new Random();
-        return list.get(random.nextInt(list.size()));
+        Location item = list.get(random.nextInt(list.size()));
+        if (empty) {
+            int i = list.size();
+            while (!world.isTileEmpty(item) && i > 0) {
+                item = list.get(random.nextInt(list.size()));
+                i--;
+            }
+        }
+        return item;
     }
 
     public static Location getRandomEmptySurroundingNonBlockingLocation(World world, Location location) {

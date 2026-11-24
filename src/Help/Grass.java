@@ -5,14 +5,14 @@ import itumulator.world.Location;
 import java.util.*;
 import itumulator.world.NonBlocking;
 
-public class Grass implements NonBlocking, Actor {
+public class Grass implements NonBlocking, Actor, Entity {
     public Grass() {
 
     }
     @Override 
     public void act(World world) {
         Random random = new Random();
-        if(random.nextBoolean()) {
+        if(random.nextBoolean() && world.isDay()) {
             spread(world);
         }
     } 
@@ -38,6 +38,11 @@ public class Grass implements NonBlocking, Actor {
         
         return neighboursArray.get(randomNeighbour);
         */
+    }
+
+    @Override
+    public boolean getNonBlockingStatus() {
+        return true;
     }
  }
 
