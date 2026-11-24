@@ -10,12 +10,12 @@ import itumulator.executable.DynamicDisplayInformationProvider;
 import itumulator.simulator.Actor;
 import itumulator.world.Location;
 
-public class Rabbit implements Actor, DynamicDisplayInformationProvider, Entity {
-    final int max_age = 5*itumulator.world.World.getTotalDayDuration();
+public class Rabbit extends Animal {
+    //final int max_age = 5*itumulator.world.World.getTotalDayDuration();
     double energy;
-    final int max_steps_without_food = itumulator.world.World.getTotalDayDuration();
+    //final int max_steps_without_food = itumulator.world.World.getTotalDayDuration();
     int steps_without_food;
-    final int getting_hungry = 5;
+    //final int getting_hungry = 5;
     final double chance_of_reproduction = 0.3;
     Burrow burrow;
     Random random;
@@ -26,7 +26,8 @@ public class Rabbit implements Actor, DynamicDisplayInformationProvider, Entity 
     boolean isNight;
 
     public Rabbit() {
-        this.energy = 1;
+        super(1, 5*itumulator.world.World.getTotalDayDuration(),itumulator.world.World.getTotalDayDuration(), 5);
+        //this.energy = 1;
         this.random = new Random();
         this.movedDuringNight = false;
         this.queue = new LinkedList<>();
@@ -152,10 +153,7 @@ public class Rabbit implements Actor, DynamicDisplayInformationProvider, Entity 
         return 2;
     }
 
-    @Override
-    public boolean getNonBlockingStatus() {
-        return false;
-    }
+
 
     @Override 
     public DisplayInformation getInformation() {
