@@ -5,13 +5,12 @@ import itumulator.executable.DisplayInformation;
 import java.awt.Color;
 
 public class Wolf extends Animal{
-    int pack_id; //Jeg tænker at det skal besluttes fra hvor end "new Animal()" bliver kaldt, hvilket ID de skal assignes, da der ikke inde fra denne klasse, vil kunne ses hvilke ulve der hører sammen?
-    boolean isNight;
-    Random random;
+    private int pack_id; //Jeg tænker at det skal besluttes fra hvor end "new Animal()" bliver kaldt, hvilket ID de skal assignes, da der ikke inde fra denne klasse, vil kunne ses hvilke ulve der hører sammen?
+    private boolean isNight;
+    private Random random;
 
-    Wolf(int energy, int max_age, int max_steps_without_food, int getting_hungry) {
-        super(energy, max_age,max_steps_without_food, getting_hungry);
-    
+    public Wolf() {
+        super(energy, max_age, max_steps_without_food, getting_hungry);
     }
 
 
@@ -33,6 +32,4 @@ public class Wolf extends Animal{
         }
         return new DisplayInformation(Color.GRAY, image_key);
     }
-
-
 }

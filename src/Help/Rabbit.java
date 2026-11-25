@@ -6,17 +6,15 @@ import java.awt.Color;
 import java.util.*;
 
 import itumulator.executable.DisplayInformation;
-import itumulator.executable.DynamicDisplayInformationProvider;
-import itumulator.simulator.Actor;
 import itumulator.world.Location;
 
 public class Rabbit extends Animal {
     //final int max_age = 5*itumulator.world.World.getTotalDayDuration();
-    double energy;
+    // double energy;
     //final int max_steps_without_food = itumulator.world.World.getTotalDayDuration();
     int steps_without_food;
     //final int getting_hungry = 5;
-    final double chance_of_reproduction = 0.3;
+    final int chance_of_reproduction = 20;
     Burrow burrow;
     Random random;
     Queue<Location> queue;
@@ -46,42 +44,22 @@ public class Rabbit extends Animal {
         Location next_queue_item = queue.poll();
         if (next_queue_item != null) {
             world.move(this, next_queue_item);
-            // if (world.getLocation(this).equals(world.getLocation(burrow)) && !sleeping) {
-            //     world.remove(this);
-            //     return;
-            // }
             act(world);
             return;
         }
 
         if (world.isNight()) {
             if (!sleeping) {
-                // sleeping = true;
                 if (burrow == null) {
-                    Location current = world.getLocation(this);
-                    Location burrow_location = world.getNonBlocking(current) instanceof Burrow ? current : Helpers.getRandomNearbyOfType(world, world.getLocation(this), Burrow.class, true, true);
-
-                    // If no burrow is in vicinity
-                    if (burrow_location == null) {
-                        // current = world.getLocation(this);
-                        // Removes grass
-                        Object non_blocking_object = world.getNonBlocking(current);
-                        if (non_blocking_object != null) world.delete(world.getNonBlocking(current));
-                        burrow = new Burrow();
-                        world.setTile(current, burrow);
-                        world.remove(this);
-                    } else {
-                        burrow = (Burrow) world.getNonBlocking(burrow_location);
-                        world.move(this, burrow_location);
-                        act(world);
-                        return;
-                    }
+                    findNewBurrow(world);
+                    act(world);
+                    return;
                 } else if (world.getLocation(this).equals(world.getLocation(burrow))) {
+                    // Removing rabbit from world to burrow
                     world.remove(this);
                 } else {
                     if (!movedDuringNight) {
-                        queue = Helpers.getRoute(world, world.getLocation(this), world.getLocation(burrow), getMaxMovesPerStep());
-                        movedDuringNight = true;
+                        moveToBurrow(world);
                         act(world);
                         return;
                     }
@@ -89,71 +67,108 @@ public class Rabbit extends Animal {
                 sleeping = true;
             }
         } else {
+            // It is day
             sleeping = false;
             movedDuringNight = false;
-            try {
-                world.getLocation(this);
-            } catch (IllegalArgumentException e) {
-                try {
-                    world.setTile(world.getLocation(burrow), this);
-                } catch (IllegalArgumentException ex) {
-                    Location surrounding_location = Helpers.getRandomEmptySurroundingTile(world, world.getLocation(burrow));
-                    if (surrounding_location == null) {
-                        Location empty_tile = Helpers.getRandomEmptyTile(world, false);
-                        if (empty_tile == null) return;
-                        world.setTile(empty_tile, this);
-                    }
-                    else world.setTile(surrounding_location, this);
-                }
-                world.getLocation(this);
+
+            if (!world.isOnTile(this)) {
+                moveFromBurrowToWorldTiles(world);
                 act(world);
                 return;
             }
 
             if (steps_without_food >= getting_hungry) {
-                // Eat grass
-                Location current = world.getLocation(this);
-                Location nearby_grass;
-                int i = 0;
-                do {
-                    nearby_grass = Helpers.getRandomNearbyOfType(world, current, Grass.class, true, true);
-                    i++;
-                } while (nearby_grass != null && world.isTileEmpty(nearby_grass) && i < 10);
-                if (nearby_grass != null && world.isTileEmpty(nearby_grass)) {
-                    world.move(this, nearby_grass);
-                    world.delete(world.getNonBlocking(nearby_grass));
-                    steps_without_food = 0;
-                } else {
-                    Location empty_tile = Helpers.getRandomEmptySurroundingTile(world, current);
-                    if (empty_tile != null) world.move(this, empty_tile);
-                }
+                eatGrass(world);
             } else {
                 Location current = world.getLocation(this);
                 Location nearby_rabbit = Helpers.getRandomNearbyOfType(world, current, Rabbit.class, false, false);
                 Location empty_tile = Helpers.getRandomEmptySurroundingTile(world, current);
 
-                if (nearby_rabbit != null && empty_tile != null && steps_without_food < getting_hungry && random.nextDouble(1) < chance_of_reproduction) {
-                    // Reproduction
-                    world.setTile(empty_tile, new Rabbit(burrow));
+                if (nearby_rabbit != null && empty_tile != null && steps_without_food < getting_hungry && random.nextInt(100) < chance_of_reproduction) {
+                    rabbitReproduce(world, empty_tile);
                 } else {
-                    // Random move
-                    if (empty_tile != null) world.move(this, empty_tile);
+                    moveToRandomLocation(world, empty_tile);
                 }
             }
         }
 
-        energy -= 1.0/max_age;
-        if (energy <= 0 || ++steps_without_food >= max_steps_without_food) {
-            world.delete(this);
-        }        
+        rabbitAging(world);
     }
 
-    public int getMaxMovesPerStep() {
+    private int getMaxMovesPerStep() {
         if (energy > 0.1) return 3;
         return 2;
     }
 
+    private void findNewBurrow(World world) {
+        Location current = world.getLocation(this);
+        Location new_burrow_location = world.getNonBlocking(current) instanceof Burrow ? current : Helpers.getRandomNearbyOfType(world, world.getLocation(this), Burrow.class, true, true);
 
+        // If no burrow is in vicinity
+        if (new_burrow_location == null) {
+            // current = world.getLocation(this);
+            // Removes grass
+            Object non_blocking_object = world.getNonBlocking(current);
+            if (non_blocking_object != null) world.delete(world.getNonBlocking(current));
+            burrow = new Burrow();
+            world.setTile(current, burrow);
+            // world.remove(this);
+        } else {
+            burrow = (Burrow) world.getNonBlocking(new_burrow_location);
+            world.move(this, new_burrow_location);
+            // act(world);
+            // return;
+        }
+    }
+
+    private void moveToBurrow(World world) {
+        queue = Helpers.getRoute(world, world.getLocation(this), world.getLocation(burrow), getMaxMovesPerStep());
+        movedDuringNight = true;
+    }
+
+    private void moveFromBurrowToWorldTiles(World world) {
+        Location burrow_location = world.getLocation(burrow);
+        if (world.isTileEmpty(burrow_location)) {
+            world.setTile(world.getLocation(burrow), this);
+        } else {
+            Location surrounding_location = Helpers.getRandomEmptySurroundingTile(world, world.getLocation(burrow));
+            if (surrounding_location == null) {
+                Location empty_tile = Helpers.getRandomEmptyTile(world, false);
+                if (empty_tile == null) return;
+                world.setTile(empty_tile, this);
+            }
+            else world.setTile(surrounding_location, this);
+        }
+    }
+
+    private void eatGrass(World world) {
+        Location current = world.getLocation(this);
+        Location nearby_grass = Helpers.getRandomNearbyOfType(world, current, Grass.class, true, true);
+
+        if (nearby_grass != null && world.isTileEmpty(nearby_grass)) {
+            world.move(this, nearby_grass);
+            world.delete(world.getNonBlocking(nearby_grass));
+            steps_without_food = 0;
+        } else {
+            Location empty_tile = Helpers.getRandomEmptySurroundingTile(world, current);
+            moveToRandomLocation(world, empty_tile);
+        }
+    }
+
+    private void moveToRandomLocation(World world, Location empty_tile) {
+        if (empty_tile != null) world.move(this, empty_tile);
+    }
+
+    private void rabbitReproduce(World world, Location empty_tile) {
+        world.setTile(empty_tile, new Rabbit(burrow));
+    }
+
+    private void rabbitAging(World world) {
+        energy -= 1.0/max_age;
+        if (energy <= 0 || ++steps_without_food >= max_steps_without_food) {
+            world.delete(this);
+        }
+    }
 
     @Override 
     public DisplayInformation getInformation() {

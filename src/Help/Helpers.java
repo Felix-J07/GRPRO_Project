@@ -72,7 +72,7 @@ public class Helpers {
         return route;
     }
 
-    public static Location getRandomNearbyOfType(World world, Location location, Class<?> type, boolean non_blocking, boolean empty) {
+    public static Location getRandomNearbyOfType(World world, Location location, Class<?> type, boolean non_blocking, boolean want_empty_tile) {
         Set<Location> neighbours = world.getSurroundingTiles(location);
         List<Location> list = new ArrayList<>(neighbours);
         for (Location current : list) {
@@ -81,18 +81,14 @@ public class Helpers {
             } else {
                 if (!type.isInstance(world.getTile(current))) neighbours.remove(current);
             }
+
+            if (want_empty_tile && !world.isTileEmpty(current)) neighbours.remove(current);
         }
         list = new ArrayList<>(neighbours);
         if (list.size() == 0) return null;
         Random random = new Random();
         Location item = list.get(random.nextInt(list.size()));
-        if (empty) {
-            int i = list.size();
-            while (!world.isTileEmpty(item) && i > 0) {
-                item = list.get(random.nextInt(list.size()));
-                i--;
-            }
-        }
+        
         return item;
     }
 

@@ -2,12 +2,12 @@ package Help;
 
 import itumulator.executable.DynamicDisplayInformationProvider;
 import itumulator.simulator.Actor;
-public abstract class Animal implements Actor, DynamicDisplayInformationProvider, Entity{
-    int energy;
-    int max_age;
-    int max_steps_without_food;
-    int getting_hungry;
-    boolean sleeping;
+public abstract class Animal implements Actor, DynamicDisplayInformationProvider, Entity {
+    protected double energy;
+    protected int max_age;
+    protected int max_steps_without_food;
+    protected int getting_hungry;
+    protected boolean sleeping;
 
     Animal(int energy, int max_age, int max_steps_without_food, int getting_hungry) {
         this.energy = energy;

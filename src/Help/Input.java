@@ -7,6 +7,7 @@ import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
 
+import itumulator.world.Location;
 import itumulator.world.World;
 
 public class Input {
@@ -24,7 +25,7 @@ public class Input {
 
     private int world_size;
 
-    private record Entry(String name, int amount) {}
+    private record Entry(String name, int amount, Location center) {}
     private List<Entry> entities;
 
     private Random random = new Random();
@@ -47,7 +48,12 @@ public class Input {
         s.nextLine();
         entities = new ArrayList<>();
         while(s.hasNext()) {
-            entities.add(new Entry(s.next(), parseAmount(s.nextLine().trim())));
+            String[] line = s.nextLine().trim().split(" ");
+            Location centerLocation = null;
+            if (line.length == 3) {
+                centerLocation = parseCoordinates(line[2]);
+            }
+            entities.add(new Entry(line[0], parseAmount(line[1]), centerLocation));
         }
         s.close();
     }
@@ -59,17 +65,33 @@ public class Input {
     private int parseAmount(String amount) {
         String[] amounts = amount.split("-");
         if (amounts.length > 1) {
-            int min = Integer.parseInt(amounts[0]);
-            int max = Integer.parseInt(amounts[1]);
-            return random.nextInt(min, max+1);
+            try {
+                int min = Integer.parseInt(amounts[0]);
+                int max = Integer.parseInt(amounts[1]);
+                return random.nextInt(min, max+1);
+            } catch (NumberFormatException e) {
+                System.out.println(e.getMessage());
+                return 0;
+            }
         }
         else return Integer.parseInt(amounts[0]);
+    }
+
+    private Location parseCoordinates(String coordinate_string) {
+        coordinate_string = coordinate_string.substring(1, coordinate_string.length()-1);
+        String[] coordinate_string_split = coordinate_string.split(",");
+        try {
+            return new Location(Integer.parseInt(coordinate_string_split[0]), Integer.parseInt(coordinate_string_split[1]));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     public void loadEntities(World world) {
         for (Entry entry : entities) {
             for (int i = 0; i < entry.amount; i++) {
-                Entity entity = entityNameToObject(entry.name);
+                Entity entity = entityNameToObject(world, entry.name, entry.center);
                 itumulator.world.Location empty_tile = Helpers.getRandomEmptyTile(world, entity.getNonBlockingStatus());
                 if (empty_tile == null) throw new RuntimeException("More entities in file than space on map");
                 world.setTile(empty_tile, entity);
@@ -77,7 +99,7 @@ public class Input {
         }
     }
 
-    private Entity entityNameToObject(String name) {
+    private Entity entityNameToObject(World world, String name, Location center) {
         switch (name) {
             case "rabbit":
                 return new Rabbit();
@@ -85,6 +107,11 @@ public class Input {
                 return new Grass();
             case "burrow":
                 return new Burrow();
+            case "wolf":
+                return new Wolf();
+            case "bear":
+                if (center == null) center = Helpers.getRandomEmptyTile(world, false);
+                return new Bear(center);
             default:
                 throw new IllegalArgumentException("Entity name " + name + " not recognised");
         }
