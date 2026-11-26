@@ -9,8 +9,8 @@ public class Wolf extends Animal{
     private boolean isNight;
     private Random random = new Random();
     private WolfPack pack;
-    public Wolf(int energy, int max_age, int max_steps_without_food, int getting_hungry, WolfPack pack) {
-        super(energy, max_age, max_steps_without_food, getting_hungry);
+    public Wolf(int energy, int max_age, int max_steps_without_food, WolfPack pack) {
+        super(energy, max_age, max_steps_without_food);
         this.pack = pack;
     }
 

@@ -13,7 +13,7 @@ public abstract class Animal implements Actor, DynamicDisplayInformationProvider
     protected boolean sleeping;
     protected int energy_use_per_day;
 
-    public Animal(int energy, int max_age, int max_steps_without_food, int getting_hungry) {
+    public Animal(int energy, int max_age, int max_steps_without_food) {
         this.energy = energy;
         this.max_age = max_age;
         this.max_steps_without_food = max_steps_without_food;

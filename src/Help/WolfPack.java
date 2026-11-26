@@ -11,7 +11,6 @@ class WolfPack {
     protected int energy = 1;
     protected int max_age = 2;
     protected int max_steps_without_food = 5;
-    protected int getting_hungry = 3;
     Random random = new Random();
     protected int pack_id;
 
@@ -20,7 +19,7 @@ class WolfPack {
         this.pack_id = random.nextInt(500000);
         this.wolves = new ArrayList<Wolf>();
         for(int i = 0; i < amount; i++) {
-            Wolf wolfie = new Wolf(energy, max_age, max_steps_without_food, getting_hungry, this);
+            Wolf wolfie = new Wolf(energy, max_age, max_steps_without_food, this);
             wolves.add(wolfie);
         }
 
