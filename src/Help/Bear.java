@@ -11,7 +11,7 @@ public class Bear extends Animal {
     private Location center;
 
     public Bear(Location center) {
-        super(energy, max_age, max_steps_without_food, getting_hungry);
+        super(200, 10*itumulator.world.World.getTotalDayDuration(), 5*itumulator.world.World.getTotalDayDuration());
         if (center == null) throw new RuntimeException("Bear teritorium center not defined");
         this.center = center;
     }

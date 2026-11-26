@@ -11,16 +11,29 @@ import itumulator.world.Location;
 import itumulator.world.World;
 
 public class Input {
-    private String[] file_names = {"t1-1a.txt", 
-                           "t1-1b.txt", 
-                           "t1-1c.txt", 
-                           "t1-2a.txt", 
-                           "t1-2b.txt", 
-                           "t1-2cde.txt", 
-                           "t1-2fg.txt", 
-                           "t1-3a.txt", 
-                           "t1-3b.txt", 
-                           "tf1-1.txt"};
+    private String[] file_names = {
+        "t1-1a.txt", 
+        "t1-1b.txt", 
+        "t1-1c.txt", 
+        "t1-2a.txt", 
+        "t1-2b.txt", 
+        "t1-2cde.txt", 
+        "t1-2fg.txt", 
+        "t1-3a.txt", 
+        "t1-3b.txt", 
+        "tf1-1.txt",
+        "t2-1ab.txt",
+        "t2-1c.txt",
+        "t2-2a.txt",
+        "t2-3a.txt",
+        "t2-4a.txt",
+        "t2-4b.txt",
+        "t2-5a.txt",
+        "t2-6a.txt",
+        "t2-7a.txt",
+        "tf2-1.txt",
+        "tf2-2.txt"
+    };
     private String input_file;
 
     private int world_size;
@@ -91,10 +104,13 @@ public class Input {
     public void loadEntities(World world) {
         for (Entry entry : entities) {
             int loops_amount = entry.name.equals("wolf") ? 1 : entry.amount;
+        
             for (int i = 0; i < loops_amount; i++) {
                 Entity entity = entityNameToObject(world, entry.name, entry.center, entry.amount);
                 itumulator.world.Location empty_tile = Helpers.getRandomEmptyTile(world, entity.getNonBlockingStatus());
+        
                 if (empty_tile == null) throw new RuntimeException("More entities in file than space on map");
+        
                 world.setTile(empty_tile, entity);
             }
         }
