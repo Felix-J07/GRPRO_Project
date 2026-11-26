@@ -1,5 +1,3 @@
-package Test;
-
 import Help.Grass;
 import Help.Helpers;
 import static org.junit.jupiter.api.Assertions.assertFalse;
