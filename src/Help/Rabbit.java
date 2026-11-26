@@ -12,20 +12,18 @@ public class Rabbit extends Animal {
     //final int max_age = 5*itumulator.world.World.getTotalDayDuration();
     // double energy;
     //final int max_steps_without_food = itumulator.world.World.getTotalDayDuration();
-    int steps_without_food;
     //final int getting_hungry = 5;
-    final int chance_of_reproduction = 20;
-    Burrow burrow;
-    Random random;
-    Queue<Location> queue;
-    boolean movedDuringNight;
-    boolean sleeping;
+    private final int chance_of_reproduction = 20;
+    private Burrow burrow;
+    private Random random;
+    private Queue<Location> queue;
+    private boolean movedDuringNight;
+    private boolean sleeping;
 
-    boolean isNight;
+    private boolean isNight;
 
     public Rabbit() {
-        super(1, 5*itumulator.world.World.getTotalDayDuration(),itumulator.world.World.getTotalDayDuration(), 5);
-        //this.energy = 1;
+        super(100, 5*itumulator.world.World.getTotalDayDuration(), itumulator.world.World.getTotalDayDuration());
         this.random = new Random();
         this.movedDuringNight = false;
         this.queue = new LinkedList<>();
@@ -77,26 +75,26 @@ public class Rabbit extends Animal {
                 return;
             }
 
-            if (steps_without_food >= getting_hungry) {
-                eatGrass(world);
+            if (energy <= getting_hungry) {
+                eatObject(world, Grass.class);
             } else {
                 Location current = world.getLocation(this);
                 Location nearby_rabbit = Helpers.getRandomNearbyOfType(world, current, Rabbit.class, false, false);
                 Location empty_tile = Helpers.getRandomEmptySurroundingTile(world, current);
 
-                if (nearby_rabbit != null && empty_tile != null && steps_without_food < getting_hungry && random.nextInt(100) < chance_of_reproduction) {
+                if (nearby_rabbit != null && empty_tile != null && energy > getting_hungry && random.nextInt(100) < chance_of_reproduction) {
                     rabbitReproduce(world, empty_tile);
                 } else {
-                    moveToRandomLocation(world, empty_tile);
+                    moveToLocation(world, empty_tile);
                 }
             }
         }
 
-        rabbitAging(world);
+        animalAging(world);
     }
 
     private int getMaxMovesPerStep() {
-        if (energy > 0.1) return 3;
+        if (age > max_age*0.1) return 3;
         return 2;
     }
 
@@ -141,34 +139,34 @@ public class Rabbit extends Animal {
         }
     }
 
-    private void eatGrass(World world) {
-        Location current = world.getLocation(this);
-        Location nearby_grass = Helpers.getRandomNearbyOfType(world, current, Grass.class, true, true);
+    // private void eatGrass(World world) {
+    //     Location current = world.getLocation(this);
+    //     Location nearby_grass = Helpers.getRandomNearbyOfType(world, current, Grass.class, true, true);
 
-        if (nearby_grass != null && world.isTileEmpty(nearby_grass)) {
-            world.move(this, nearby_grass);
-            world.delete(world.getNonBlocking(nearby_grass));
-            steps_without_food = 0;
-        } else {
-            Location empty_tile = Helpers.getRandomEmptySurroundingTile(world, current);
-            moveToRandomLocation(world, empty_tile);
-        }
-    }
+    //     if (nearby_grass != null && world.isTileEmpty(nearby_grass)) {
+    //         world.move(this, nearby_grass);
+    //         world.delete(world.getNonBlocking(nearby_grass));
+    //     } else {
+    //         Location empty_tile = Helpers.getRandomEmptySurroundingTile(world, current);
+    //         moveToLocation(world, empty_tile);
+    //     }
+    // }
 
-    private void moveToRandomLocation(World world, Location empty_tile) {
-        if (empty_tile != null) world.move(this, empty_tile);
-    }
+    // private void moveToRandomLocation(World world, Location empty_tile) {
+    //     if (empty_tile != null) world.move(this, empty_tile);
+    // }
 
     private void rabbitReproduce(World world, Location empty_tile) {
         world.setTile(empty_tile, new Rabbit(burrow));
     }
 
-    private void rabbitAging(World world) {
-        energy -= 1.0/max_age;
-        if (energy <= 0 || ++steps_without_food >= max_steps_without_food) {
-            world.delete(this);
-        }
-    }
+    // private void rabbitAging(World world) {
+    //     age++;
+    //     energy -= energy_use_per_day;
+    //     if (energy <= 0) {
+    //         world.delete(this);
+    //     }
+    // }
 
     @Override 
     public DisplayInformation getInformation() {

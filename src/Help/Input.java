@@ -90,8 +90,9 @@ public class Input {
 
     public void loadEntities(World world) {
         for (Entry entry : entities) {
-            for (int i = 0; i < entry.amount; i++) {
-                Entity entity = entityNameToObject(world, entry.name, entry.center);
+            int loops_amount = entry.name.equals("wolf") ? 1 : entry.amount;
+            for (int i = 0; i < loops_amount; i++) {
+                Entity entity = entityNameToObject(world, entry.name, entry.center, entry.amount);
                 itumulator.world.Location empty_tile = Helpers.getRandomEmptyTile(world, entity.getNonBlockingStatus());
                 if (empty_tile == null) throw new RuntimeException("More entities in file than space on map");
                 world.setTile(empty_tile, entity);
@@ -99,7 +100,7 @@ public class Input {
         }
     }
 
-    private Entity entityNameToObject(World world, String name, Location center) {
+    private Entity entityNameToObject(World world, String name, Location center, int amount) {
         switch (name) {
             case "rabbit":
                 return new Rabbit();
@@ -108,7 +109,7 @@ public class Input {
             case "burrow":
                 return new Burrow();
             case "wolf":
-                return new Wolf();
+                return new WolfPack(amount);
             case "bear":
                 if (center == null) center = Helpers.getRandomEmptyTile(world, false);
                 return new Bear(center);
