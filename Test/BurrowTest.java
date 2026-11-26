@@ -1,5 +1,3 @@
-package Test;
-
 import Help.Burrow;
 import Help.Rabbit;
 
